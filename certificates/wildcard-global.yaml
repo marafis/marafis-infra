@@ -1,10 +1,11 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: wildcard-marafis-tls
-  namespace: website
+  name: wildcard-marafis-global
+  namespace: cert-manager
 spec:
   secretName: wildcard-marafis-tls
+
   issuerRef:
     name: letsencrypt-wildcard
     kind: ClusterIssuer
