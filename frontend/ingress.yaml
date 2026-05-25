@@ -12,7 +12,7 @@ spec:
     - hosts:
         - marafis.com
         - www.marafis.com
-      secretName: website-tls
+      secretName: wildcard-marafis-tls
 
   rules:
     - host: marafis.com
