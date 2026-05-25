@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: strapi
+  namespace: website
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: strapi
+  template:
+    metadata:
+      labels:
+        app: strapi
+    spec:
+      containers:
+        - name: strapi
+          image: ghcr.io/marafis/strapi-cms:latest
+          ports:
+            - containerPort: 1337
+          env:
+            - name: DATABASE_CLIENT
+              value: postgres
+            - name: DATABASE_HOST
+              value: postgres
+            - name: DATABASE_PORT
+              value: "5432"
+            - name: DATABASE_NAME
+              value: strapi
+            - name: DATABASE_USERNAME
+              value: strapi
+            - name: DATABASE_PASSWORD
+              value: strongpassword
+            - name: HOST
+              value: "0.0.0.0"
+            - name: PORT
+              value: "1337"

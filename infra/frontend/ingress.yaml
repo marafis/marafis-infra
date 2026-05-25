@@ -31,3 +31,14 @@ spec:
                 name: website-frontend
                 port:
                   number: 80
+
+    - host: cms.marafis.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: strapi
+                port:
+                  number: 1337
