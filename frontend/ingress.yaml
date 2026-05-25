@@ -10,12 +10,6 @@ metadata:
 spec:
   ingressClassName: nginx
 
-  tls:
-    - hosts:
-        - marafis.com
-        - www.marafis.com
-      secretName: wildcard-marafis-tls
-
   rules:
     - host: marafis.com
       http:
