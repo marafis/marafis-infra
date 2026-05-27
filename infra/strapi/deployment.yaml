@@ -19,7 +19,7 @@ spec:
         runAsUser: 1000
       containers:
         - name: strapi
-          image: ghcr.io/marafis/strapi-cms:00e188a
+          image: ghcr.io/marafis/strapi-cms:b62e7ad
           ports:
             - containerPort: 1337
           env:
