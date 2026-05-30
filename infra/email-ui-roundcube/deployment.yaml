@@ -24,6 +24,6 @@ spec:
             - containerPort: 80
           env:
             - name: ROUNDCUBEMAIL_DEFAULT_HOST
-              value: "ssl://mail.marafis.com"
+              value: "tls://mail.marafis.com"
             - name: ROUNDCUBEMAIL_DEFAULT_PORT
-              value: "993"
+              value: "143"
