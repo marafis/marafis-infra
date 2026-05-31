@@ -28,10 +28,6 @@ spec:
               value: strapi
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
-            # Only effective on first initdb — remove if PVC already has data
-            # to avoid confusion about what's actually in pg_hba.conf
-            - name: POSTGRES_INITDB_ARGS
-              value: "--auth=scram-sha-256"
           readinessProbe:
             exec:
               command: ["/bin/sh", "-c", "pg_isready -U strapi -d strapi"]
