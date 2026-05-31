@@ -24,7 +24,7 @@ spec:
             - name: POSTGRES_USER
               value: strapi
             - name: POSTGRES_PASSWORD
-              value: strongpassword
+              value: strapi
           ports:
             - containerPort: 5432
           resources:
