@@ -3,12 +3,13 @@ kind: Ingress
 metadata:
   name: website-ingress
   namespace: website
-  # No cert-manager annotations needed here.
-  # No tls: block needed here.
-  # HTTPS is handled automatically by ingress-nginx using the wildcard-tls secret.
 spec:
   ingressClassName: nginx
-
+  tls:
+    - hosts:
+        - marafis.com
+        - www.marafis.com
+      secretName: wildcard-marafis-tls
   rules:
     - host: marafis.com
       http:
@@ -20,7 +21,6 @@ spec:
                 name: website-frontend
                 port:
                   number: 80
-
     - host: www.marafis.com
       http:
         paths:

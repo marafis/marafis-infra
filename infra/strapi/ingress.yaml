@@ -5,6 +5,10 @@ metadata:
   namespace: website
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+        - cms.marafis.com
+      secretName: wildcard-marafis-tls
   rules:
     - host: cms.marafis.com
       http:
