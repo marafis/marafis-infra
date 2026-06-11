@@ -1,27 +1,23 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: strapi
+  name: cluster-issuer
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
-
+    argocd.argoproj.io/sync-wave: "3"
 spec:
   project: default
 
   source:
     repoURL: https://github.com/marafis/marafis-infra.git
-    path: infra/strapi
     targetRevision: main
+    path: infra/manifests/platform/cluster-issuer
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: website
+    namespace: cert-manager
 
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
-      allowEmpty: false # Protects backend from accidental deletions
-    syncOptions:
-      - CreateNamespace=true # Ensures namespace exists regardless of which app syncs first

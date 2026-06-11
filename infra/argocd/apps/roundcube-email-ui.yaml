@@ -1,21 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: ip-pool
+  name: roundcube-app
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
+
 spec:
   project: default
-
   source:
-    repoURL: https://github.com/marafis/marafis-infra.git
+    repoURL: 'https://github.com/marafis/marafis-infra.git'
     targetRevision: main
-    path: infra/metallb
+    path: infra/manifests/apps/email-ui-roundcube
 
   destination:
-    server: https://kubernetes.default.svc
-    namespace: metallb-system
+    server: 'https://kubernetes.default.svc'
+    namespace: default
 
   syncPolicy:
     automated:

@@ -1,2 +1,3 @@
 argocd/gcp-dns-key.json
 /.git-rewrite/
+/.idea/

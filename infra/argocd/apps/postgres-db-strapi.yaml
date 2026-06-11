@@ -12,7 +12,7 @@ spec:
   source:
     repoURL: https://github.com/marafis/marafis-infra.git
     targetRevision: main
-    path: infra/postgres
+    path: infra/manifests/apps/postgres
 
   destination:
     server: https://kubernetes.default.svc
