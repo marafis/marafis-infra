@@ -22,5 +22,5 @@ spec:
             # Expected structure: kubectl create secret generic clouddns-sa-secret \
             #   --from-file=key.json=./sa-key.json -n cert-manager
             serviceAccountSecretRef:
-              name: clouddns-dns01-solver-svc-acct  # REPLACE: name of your existing K8s Secret
+              name: clouddns-sa-secret  # REPLACE: name of your existing K8s Secret
               key: key.json                # key inside the Secret (usually key.json)
