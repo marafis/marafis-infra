@@ -9,7 +9,7 @@ spec:
   source:
     repoURL: https://github.com/marafis/marafis-infra.git
     targetRevision: main
-    path: infra/argocd               # ArgoCD watches this folder for all child apps
+    path: infra/argocd
 
   destination:
     server: https://kubernetes.default.svc
