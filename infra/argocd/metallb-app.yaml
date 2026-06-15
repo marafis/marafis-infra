@@ -4,8 +4,7 @@ metadata:
   name: metallb
   namespace: argocd
   annotations:
-    # Set to wave 0 so network provisioning stabilizes before Strapi (2) and Frontend (4) run
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "-3"
 spec:
   project: default
 
