@@ -23,11 +23,22 @@ spec:
           image: roundcube/roundcubemail:latest
           ports:
             - containerPort: 80
-          # We can completely remove the duplicate env vars since they are explicitly defined above
+          env:
+            - name: ROUNDCUBEMAIL_DEFAULT_HOST
+              value: "ssl://mail.marafis.com"
+            - name: ROUNDCUBEMAIL_DEFAULT_PORT
+              value: "993"
+            - name: ROUNDCUBEMAIL_SMTP_SERVER
+              value: "tls://mail.marafis.com"
+            - name: ROUNDCUBEMAIL_SMTP_PORT
+              value: "587"
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "cp /tmp/custom-config/config.user.inc.php /var/www/html/config/config.user.inc.php"]
           volumeMounts:
             - name: config-volume
-              mountPath: /var/www/html/config/config.docker.inc.php
-              subPath: config.docker.inc.php
+              mountPath: /tmp/custom-config
       volumes:
         - name: config-volume
           configMap:

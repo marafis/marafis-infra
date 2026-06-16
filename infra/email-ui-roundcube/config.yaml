@@ -5,16 +5,14 @@ metadata:
   name: roundcube-config
   namespace: website
 data:
-  config.docker.inc.php: |
+  config.user.inc.php: |
     <?php
-    $config['db_dsnw'] = env('ROUNDCUBEMAIL_DB_DSNW');
-    $config['default_host'] = 'ssl://mail.marafis.com';
-    $config['default_port'] = 993;
-    $config['smtp_server'] = 'tls://mail.marafis.com';
-    $config['smtp_port'] = 587;
-    $config['temp_dir'] = '/tmp/roundcube';
+    // Native PHP syntax for pulling environment variables safely
+    if (getenv('ROUNDCUBEMAIL_DB_DSNW')) {
+        $config['db_dsnw'] = getenv('ROUNDCUBEMAIL_DB_DSNW');
+    }
 
-    // Forcefully disable peer validation deep in the PHP stream layer
+    // Forcefully override connection options globally
     $config['imap_conn_options'] = [
         'ssl' => [
             'verify_peer'       => false,
