@@ -28,12 +28,16 @@ spec:
               value: "ssl://mail.marafis.com"
             - name: ROUNDCUBEMAIL_DEFAULT_PORT
               value: "993"
-            # Route securely via domain using STARTTLS
             - name: ROUNDCUBEMAIL_SMTP_SERVER
               value: "tls://mail.marafis.com"
             - name: ROUNDCUBEMAIL_SMTP_PORT
               value: "587"
-            - name: ROUNDCUBEMAIL_IMAP_CONN_OPTIONS
-              value: '{"ssl":{"verify_peer":false,"verify_peer_name":false,"allow_self_signed":true}}'
-            - name: ROUNDCUBEMAIL_SMTP_CONN_OPTIONS
-              value: '{"ssl":{"verify_peer":false,"verify_peer_name":false,"allow_self_signed":true}}'
+          volumeMounts:
+            # Mount our custom config file directly into the config directory
+            - name: config-volume
+              mountPath: /var/www/html/config/config.user.inc.php
+              subPath: config.user.inc.php
+      volumes:
+        - name: config-volume
+          configMap:
+            name: roundcube-config
