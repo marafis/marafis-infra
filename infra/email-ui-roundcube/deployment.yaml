@@ -38,7 +38,8 @@ spec:
                 command: ["/bin/sh", "-c", "cp /tmp/custom-config/config.user.inc.php /var/www/html/config/config.user.inc.php"]
           volumeMounts:
             - name: config-volume
-              mountPath: /tmp/custom-config
+              mountPath: /var/www/html/config/config.user.inc.php
+              subPath: config.user.inc.php
       volumes:
         - name: config-volume
           configMap:
