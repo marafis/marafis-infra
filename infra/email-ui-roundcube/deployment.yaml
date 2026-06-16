@@ -24,17 +24,31 @@ spec:
           ports:
             - containerPort: 80
           env:
+            # Change from "ssl://10.0.0.2" to the pure IP string
             - name: ROUNDCUBEMAIL_DEFAULT_HOST
-              value: "ssl://10.0.0.2"
+              value: "10.0.0.2"
             - name: ROUNDCUBEMAIL_DEFAULT_PORT
               value: "993"
+            # Change from "tls://10.0.0.2" to the pure IP string
             - name: ROUNDCUBEMAIL_SMTP_SERVER
-              value: "tls://10.0.0.2"
+              value: "10.0.0.2"
             - name: ROUNDCUBEMAIL_SMTP_PORT
               value: "587"
 
-            # Runtime SSL injection bypassing the filesystem mount issue
+            # Inject context properties explicitly targeting the pure endpoints
             - name: ROUNDCUBEMAIL_DOCKER_OPTIONS
               value: |
-                $config['imap_conn_options'] = ['ssl' => ['verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true]];
-                $config['smtp_conn_options'] = ['ssl' => ['verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true]];
+                $config['imap_conn_options'] = [
+                    'ssl' => [
+                        'verify_peer' => false,
+                        'verify_peer_name' => false,
+                        'allow_self_signed' => true
+                    ]
+                ];
+                $config['smtp_conn_options'] = [
+                    'ssl' => [
+                        'verify_peer' => false,
+                        'verify_peer_name' => false,
+                        'allow_self_signed' => true
+                    ]
+                ];
