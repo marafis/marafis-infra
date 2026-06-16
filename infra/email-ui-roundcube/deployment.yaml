@@ -25,11 +25,11 @@ spec:
             - containerPort: 80
           env:
             - name: ROUNDCUBEMAIL_DEFAULT_HOST
-              value: ""tls://10.0.0.2"
+              value: "tls://10.0.0.2"
             - name: ROUNDCUBEMAIL_DEFAULT_PORT
               value: "993"
             - name: ROUNDCUBEMAIL_SMTP_SERVER
-              value: ""tls://10.0.0.2"
+              value: "tls://10.0.0.2"
             - name: ROUNDCUBEMAIL_SMTP_PORT
               value: "587"
 
