@@ -5,7 +5,7 @@ metadata:
   name: roundcube-config
   namespace: website
 data:
-  roundcube.php: |
+  config.user.inc.php: |
     <?php
     $config['imap_conn_options'] = [
       'ssl' => [
