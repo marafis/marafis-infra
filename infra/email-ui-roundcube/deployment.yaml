@@ -18,7 +18,6 @@ spec:
         - ip: "94.130.107.251"
           hostnames:
             - "mail.marafis.com"
-      # --- Init Container Removed ---
       containers:
         - name: roundcube
           image: roundcube/roundcubemail:latest
@@ -33,13 +32,9 @@ spec:
               value: "tls://10.0.0.2"
             - name: ROUNDCUBEMAIL_SMTP_PORT
               value: "587"
-          volumeMounts:
-            # Mount the ConfigMap file directly into the config directory
-            - name: roundcube-custom-config
-              mountPath: /var/www/html/config/config.user.inc.php
-              subPath: config.user.inc.php
-      volumes:
-        # Changed from emptyDir to ConfigMap
-        - name: roundcube-custom-config
-          configMap:
-            name: roundcube-config
+
+            # Runtime SSL injection bypassing the filesystem mount issue
+            - name: ROUNDCUBEMAIL_DOCKER_OPTIONS
+              value: |
+                $config['imap_conn_options'] = ['ssl' => ['verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true]];
+                $config['smtp_conn_options'] = ['ssl' => ['verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true]];
