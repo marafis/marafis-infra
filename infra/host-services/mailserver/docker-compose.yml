@@ -38,4 +38,6 @@ services:
       - PERMIT_DOCKER=network
       - UPDATE_CHECK_INTERVAL=1d
       - DOVECOT_AUTH_MECHANISMS=plain login
+      - PERMIT_DOCKER=network-interface
+      - OUR_NETWORKS=10.42.0.0/16,10.43.0.0/16,10.0.0.0/24
     restart: always
