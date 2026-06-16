@@ -37,7 +37,7 @@ spec:
               value: '{"ssl":{"verify_peer":false,"verify_peer_name":false}}'
           volumeMounts:
             - name: roundcube-config
-              mountPath: /etc/roundcube/config.inc.php
+              mountPath: /var/www/html/config/config.inc.php
               subPath: roundcube.php
       volumes:
         - name: roundcube-config
