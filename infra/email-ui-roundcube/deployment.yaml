@@ -1,10 +1,18 @@
+# infra/email-ui-roundcube/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: roundcube
   namespace: website
 spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: roundcube
   template:
+    metadata:
+      labels:
+        app: roundcube
     spec:
       hostAliases:
         - ip: "94.130.107.251"
@@ -17,14 +25,14 @@ spec:
             - sh
             - -c
             - |
-              cat > /config/ssl-options.php << 'EOF'
+              cat > /ssl-config/ssl-options.php << 'PHPEOF'
               <?php
               $config['imap_conn_options'] = ['ssl' => ['verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true]];
               $config['smtp_conn_options'] = ['ssl' => ['verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true]];
-              EOF
+              PHPEOF
           volumeMounts:
             - name: ssl-config
-              mountPath: /config
+              mountPath: /ssl-config
       containers:
         - name: roundcube
           image: roundcube/roundcubemail:latest
