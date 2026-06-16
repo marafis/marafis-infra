@@ -23,7 +23,6 @@ spec:
           ports:
             - containerPort: 80
           env:
-            # Point directly to the host's internal network gateway
             - name: ROUNDCUBEMAIL_DEFAULT_HOST
               value: "ssl://10.0.0.2"
             - name: ROUNDCUBEMAIL_DEFAULT_PORT
@@ -32,3 +31,15 @@ spec:
               value: "tls://10.0.0.2"
             - name: ROUNDCUBEMAIL_SMTP_PORT
               value: "587"
+            - name: ROUNDCUBEMAIL_IMAP_CONN_OPTIONS
+              value: '{"ssl":{"verify_peer":false,"verify_peer_name":false}}'
+            - name: ROUNDCUBEMAIL_SMTP_CONN_OPTIONS
+              value: '{"ssl":{"verify_peer":false,"verify_peer_name":false}}'
+          volumeMounts:
+            - name: roundcube-config
+              mountPath: /etc/roundcube/config.inc.php
+              subPath: roundcube.php
+      volumes:
+        - name: roundcube-config
+          configMap:
+            name: roundcube-config
