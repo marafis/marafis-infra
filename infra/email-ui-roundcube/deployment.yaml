@@ -24,14 +24,12 @@ spec:
           ports:
             - containerPort: 80
           env:
-            # Change from "ssl://10.0.0.2" to the pure IP string
             - name: ROUNDCUBEMAIL_DEFAULT_HOST
-              value: "10.0.0.2"
+              value: ""tls://10.0.0.2"
             - name: ROUNDCUBEMAIL_DEFAULT_PORT
               value: "993"
-            # Change from "tls://10.0.0.2" to the pure IP string
             - name: ROUNDCUBEMAIL_SMTP_SERVER
-              value: "10.0.0.2"
+              value: ""tls://10.0.0.2"
             - name: ROUNDCUBEMAIL_SMTP_PORT
               value: "587"
 
