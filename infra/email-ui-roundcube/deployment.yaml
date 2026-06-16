@@ -25,10 +25,10 @@ spec:
           env:
             # Point directly to the host's internal network gateway
             - name: ROUNDCUBEMAIL_DEFAULT_HOST
-              value: "172.17.0.1"
+              value: "ssl://10.0.0.2"
             - name: ROUNDCUBEMAIL_DEFAULT_PORT
-              value: "143"
+              value: "993"
             - name: ROUNDCUBEMAIL_SMTP_SERVER
-              value: "172.17.0.1"
+              value: "tls://10.0.0.2"
             - name: ROUNDCUBEMAIL_SMTP_PORT
               value: "587"
