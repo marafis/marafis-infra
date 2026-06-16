@@ -1,4 +1,8 @@
-# infra/email-ui-roundcube/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: roundcube
+  namespace: website
 spec:
   template:
     spec:
