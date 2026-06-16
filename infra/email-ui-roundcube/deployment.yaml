@@ -33,21 +33,7 @@ spec:
               value: "tls://mail.marafis.com"
             - name: ROUNDCUBEMAIL_SMTP_PORT
               value: "587"
-
-            # Inject context properties explicitly targeting the pure endpoints
-            - name: ROUNDCUBEMAIL_DOCKER_OPTIONS
-              value: |
-                $config['imap_conn_options'] = [
-                    'ssl' => [
-                        'verify_peer' => false,
-                        'verify_peer_name' => false,
-                        'allow_self_signed' => true
-                    ]
-                ];
-                $config['smtp_conn_options'] = [
-                    'ssl' => [
-                        'verify_peer' => false,
-                        'verify_peer_name' => false,
-                        'allow_self_signed' => true
-                    ]
-                ];
+            - name: ROUNDCUBEMAIL_IMAP_CONN_OPTIONS
+              value: '{"ssl":{"verify_peer":false,"verify_peer_name":false,"allow_self_signed":true}}'
+            - name: ROUNDCUBEMAIL_SMTP_CONN_OPTIONS
+              value: '{"ssl":{"verify_peer":false,"verify_peer_name":false,"allow_self_signed":true}}'
