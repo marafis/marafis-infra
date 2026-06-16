@@ -1,22 +1,26 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: roundcube
-  namespace: website
+# infra/email-ui-roundcube/deployment.yaml
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: roundcube
   template:
-    metadata:
-      labels:
-        app: roundcube
     spec:
       hostAliases:
-        - ip: "94.130.107.251" # Force it to resolve externally to the host interface cleanly
+        - ip: "94.130.107.251"
           hostnames:
             - "mail.marafis.com"
+      initContainers:
+        - name: write-ssl-config
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+              cat > /config/ssl-options.php << 'EOF'
+              <?php
+              $config['imap_conn_options'] = ['ssl' => ['verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true]];
+              $config['smtp_conn_options'] = ['ssl' => ['verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true]];
+              EOF
+          volumeMounts:
+            - name: ssl-config
+              mountPath: /config
       containers:
         - name: roundcube
           image: roundcube/roundcubemail:latest
@@ -31,15 +35,10 @@ spec:
               value: "tls://10.0.0.2"
             - name: ROUNDCUBEMAIL_SMTP_PORT
               value: "587"
-            - name: ROUNDCUBEMAIL_IMAP_CONN_OPTIONS
-              value: '{"ssl":{"verify_peer":false,"verify_peer_name":false}}'
-            - name: ROUNDCUBEMAIL_SMTP_CONN_OPTIONS
-              value: '{"ssl":{"verify_peer":false,"verify_peer_name":false}}'
           volumeMounts:
-            - name: roundcube-config
-              mountPath: /var/www/html/config/config.inc.php
-              subPath: roundcube.php
+            - name: ssl-config
+              mountPath: /var/www/html/config/ssl-options.php
+              subPath: ssl-options.php
       volumes:
-        - name: roundcube-config
-          configMap:
-            name: roundcube-config
+        - name: ssl-config
+          emptyDir: {}
