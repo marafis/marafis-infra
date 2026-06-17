@@ -4,6 +4,9 @@ kind: Deployment
 metadata:
   name: roundcube
   namespace: website
+  labels:
+    app.kubernetes.io/name: roundcube
+    app.kubernetes.io/part-of: marafis-email
 spec:
   replicas: 1
   selector:
@@ -32,10 +35,6 @@ spec:
               value: "tls://mail.marafis.com"
             - name: ROUNDCUBEMAIL_SMTP_PORT
               value: "587"
-          lifecycle:
-            postStart:
-              exec:
-                command: ["/bin/sh", "-c", "cp /tmp/custom-config/config.user.inc.php /var/www/html/config/config.user.inc.php"]
           volumeMounts:
             - name: config-volume
               mountPath: /var/www/html/config/config.user.inc.php

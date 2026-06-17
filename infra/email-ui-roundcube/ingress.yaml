@@ -3,14 +3,13 @@ kind: Ingress
 metadata:
   name: roundcube-ingress
   namespace: website
+  annotations:
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "25m"
 spec:
   ingressClassName: nginx
-  tls:
-    - hosts:
-        - mail.marafis.com
-      secretName: wildcard-marafis-tls
   rules:
-    - host: mail.marafis.com
+    - host: webmail.marafis.com
       http:
         paths:
           - path: /
