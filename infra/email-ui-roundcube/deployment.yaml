@@ -24,15 +24,17 @@ spec:
       containers:
         - name: roundcube
           image: roundcube/roundcubemail:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
+              name: http
           env:
             - name: ROUNDCUBEMAIL_DEFAULT_HOST
-              value: "mail.marafis.com"
+              value: "94.130.107.251"
             - name: ROUNDCUBEMAIL_DEFAULT_PORT
               value: "993"
             - name: ROUNDCUBEMAIL_SMTP_SERVER
-              value: "mail.marafis.com"
+              value: "94.130.107.251"
             - name: ROUNDCUBEMAIL_SMTP_PORT
               value: "587"
           volumeMounts:

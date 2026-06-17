@@ -7,8 +7,8 @@ metadata:
 data:
   config.user.inc.php: |
     <?php
-    $config['default_host'] = 'ssl://mail.marafis.com';
-    $config['smtp_server'] = 'tls://mail.marafis.com';
+    $config['default_host'] = 'ssl://94.130.107.251';
+    $config['smtp_server'] = 'tls://94.130.107.251';
     
     // FDisable strict upstream verification for local network peering
     $config['imap_conn_options'] = [
@@ -16,6 +16,7 @@ data:
             'verify_peer'       => false,
             'verify_peer_name'  => false,
             'allow_self_signed' => true,
+            'peer_name'         => 'mail.marafis.com',
         ],
     ];
     $config['smtp_conn_options'] = [
@@ -23,5 +24,6 @@ data:
             'verify_peer'       => false,
             'verify_peer_name'  => false,
             'allow_self_signed' => true,
+            'peer_name'         => 'mail.marafis.com',
         ],
     ];
