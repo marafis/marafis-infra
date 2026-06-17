@@ -18,14 +18,13 @@ services:
       - ./mail-logs:/var/log/mail
       - ./config:/tmp/docker-mailserver
       # Mount directory containing mapped cert-manager certificates from the host
-      - /etc/letsencrypt/live/marafis.com:/etc/letsencrypt/live/marafis.com:ro
+      - /etc/letsencrypt/live/marafis.com:/tmp/dms/certs:ro
     environment:
       - OVERVIEW_ENABLED=0
 
       # TLS Configuration using your cert-manager certificates
       - SSL_TYPE=manual
-      - SSL_CERT_PATH=/etc/letsencrypt/live/marafis.com/fullchain.pem
-      - SSL_KEY_PATH=/etc/letsencrypt/live/marafis.com/privkey.pem
+      - SSL_CERT_DIR=/tmp/dms/certs
 
       # Resource Optimization: Disable high-memory scanning services (~300MB RAM footprint total)
       - ENABLE_SPAMASSASSIN=0
