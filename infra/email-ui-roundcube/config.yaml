@@ -7,12 +7,10 @@ metadata:
 data:
   config.user.inc.php: |
     <?php
-    // Native PHP syntax for pulling environment variables safely
-    if (getenv('ROUNDCUBEMAIL_DB_DSNW')) {
-        $config['db_dsnw'] = getenv('ROUNDCUBEMAIL_DB_DSNW');
-    }
-
-    // Forcefully override connection options globally
+    $config['default_host'] = 'ssl://mail.marafis.com';
+    $config['smtp_server'] = 'tls://mail.marafis.com';
+    
+    // FDisable strict upstream verification for local network peering
     $config['imap_conn_options'] = [
         'ssl' => [
             'verify_peer'       => false,
