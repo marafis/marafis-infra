@@ -39,7 +39,7 @@ spec:
               value: "587"
           volumeMounts:
             - name: config-volume
-              mountPath: /var/www/html/config/config.user.inc.php
+              mountPath: /var/roundcube/config/custom.inc.php
               subPath: config.user.inc.php
       volumes:
         - name: config-volume
