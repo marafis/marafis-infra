@@ -30,17 +30,17 @@ spec:
               name: http
           env:
             - name: ROUNDCUBEMAIL_DEFAULT_HOST
-              value: "94.130.107.251"
+              value: "ssl://mail.marafis.com"
             - name: ROUNDCUBEMAIL_DEFAULT_PORT
-              value: "143"
+              value: "993"
             - name: ROUNDCUBEMAIL_SMTP_SERVER
-              value: "94.130.107.251"
+              value: "tls://mail.marafis.com"
             - name: ROUNDCUBEMAIL_SMTP_PORT
               value: "587"
           volumeMounts:
             - name: config-volume
               mountPath: /var/roundcube/config/custom.inc.php
-              subPath: config.user.inc.php
+              subPath: config.inc.php
       volumes:
         - name: config-volume
           configMap:
