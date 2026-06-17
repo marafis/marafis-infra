@@ -7,8 +7,8 @@ metadata:
 data:
   config.user.inc.php: |
     <?php
-    $config['default_host'] = 'tls://94.130.107.251';
-    $config['smtp_server'] = 'tls://94.130.107.251';
+    $config['default_host'] = 'tls://94.130.107.251:143';
+    $config['smtp_server'] = 'tls://94.130.107.251:587';
     
     // FDisable strict upstream verification for local network peering
     $config['imap_conn_options'] = [

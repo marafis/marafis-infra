@@ -32,7 +32,7 @@ spec:
             - name: ROUNDCUBEMAIL_DEFAULT_HOST
               value: "94.130.107.251"
             - name: ROUNDCUBEMAIL_DEFAULT_PORT
-              value: "993"
+              value: "143"
             - name: ROUNDCUBEMAIL_SMTP_SERVER
               value: "94.130.107.251"
             - name: ROUNDCUBEMAIL_SMTP_PORT
