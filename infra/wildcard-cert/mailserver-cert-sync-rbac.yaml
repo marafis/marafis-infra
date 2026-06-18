@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: cert-manager
-  namespace: cert-manager
+  namespace: ingress-nginx
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -24,4 +24,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: cert-manager
-    namespace: cert-manager
+    namespace: ingress-nginx

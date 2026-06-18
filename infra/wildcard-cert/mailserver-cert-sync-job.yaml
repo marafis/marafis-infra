@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: mailserver-cert-sync
-  namespace: cert-manager
+  namespace: ingress-nginx
 spec:
   schedule: "*/2 * * * *"
   jobTemplate:
@@ -23,10 +23,10 @@ spec:
                   CERT_DIR=/host/opt/mailserver/certs
                   mkdir -p $CERT_DIR
 
-                  kubectl get secret wildcard-tls-mailserver -n cert-manager \
+                  kubectl get secret wildcard-tls-mailserver -n ingress-nginx \
                     -o jsonpath="{.data.tls\.crt}" | base64 -d > $CERT_DIR/fullchain.pem
 
-                  kubectl get secret wildcard-tls-mailserver -n cert-manager \
+                  kubectl get secret wildcard-tls-mailserver -n ingress-nginx \
                     -o jsonpath="{.data.tls\.key}" | base64 -d > $CERT_DIR/privkey.pem
 
               volumeMounts:
