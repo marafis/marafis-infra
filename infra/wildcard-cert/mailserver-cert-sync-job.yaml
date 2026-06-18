@@ -4,7 +4,7 @@ metadata:
   name: mailserver-cert-sync
   namespace: cert-manager
 spec:
-  schedule: "*/5 * * * *"
+  schedule: "*/2 * * * *"
   jobTemplate:
     spec:
       template:
@@ -20,7 +20,7 @@ spec:
                 - |
                   set -e
 
-                  CERT_DIR=/host/mailserver/certs
+                  CERT_DIR=/host/opt/mailserver/certs
                   mkdir -p $CERT_DIR
 
                   kubectl get secret wildcard-tls-mailserver -n cert-manager \
@@ -31,9 +31,9 @@ spec:
 
               volumeMounts:
                 - name: host
-                  mountPath: /host/mailserver
+                  mountPath: /host
 
           volumes:
             - name: host
               hostPath:
-                path: /opt/mailserver
+                path: /
