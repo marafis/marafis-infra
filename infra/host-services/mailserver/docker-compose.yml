@@ -4,29 +4,34 @@ services:
   mailserver:
     image: ghcr.io/docker-mailserver/docker-mailserver:latest
     container_name: mailserver
+
     hostname: mail
     domainname: marafis.com
+
     ports:
-      - "25:25"     # SMTP (Server-to-Server delivery)
-      - "143:143"   # IMAP STARTTLS
-      - "465:465"   # SMTPS (Implicit SSL/TLS)
-      - "587:587"   # SMTP Submission (STARTTLS)
-      - "993:993"   # IMAPS (Implicit SSL/TLS)
+      - "25:25"
+      - "143:143"
+      - "465:465"
+      - "587:587"
+      - "993:993"
+
     volumes:
-      - ./mail-data:/var/mail
-      - ./mail-state:/var/mail-state
-      - ./mail-logs:/var/log/mail
-      - ./config:/tmp/docker-mailserver
-      # Mount directory containing mapped cert-manager certificates from the host
-      - /etc/letsencrypt/live/marafis.com:/tmp/dms/certs:ro
+      - /opt/mailserver/mail-data:/var/mail
+      - /opt/mailserver/mail-state:/var/mail-state
+      - /opt/mailserver/mail-logs:/var/log/mail
+
+      # ONLY ONE CERT SOURCE (correct)
+      - /opt/mailserver/certs:/tmp/dms/certs:ro
+
     environment:
       - OVERVIEW_ENABLED=0
 
-      # TLS Configuration using your cert-manager certificates
+      # ✅ TLS (correct)
       - SSL_TYPE=manual
-      - SSL_CERT_DIR=/tmp/dms/certs
+      - SSL_CERT_PATH=/tmp/dms/certs/fullchain.pem
+      - SSL_KEY_PATH=/tmp/dms/certs/privkey.pem
 
-      # Resource Optimization: Disable high-memory scanning services (~300MB RAM footprint total)
+      # Performance
       - ENABLE_SPAMASSASSIN=0
       - ENABLE_CLAMAV=0
       - ENABLE_FAIL2BAN=1
@@ -35,8 +40,9 @@ services:
       - ONE_DIR=1
       - LOG_LEVEL=info
       - PERMIT_DOCKER=network
+      - PERMIT_DOCKER=network-interface
       - UPDATE_CHECK_INTERVAL=1d
       - DOVECOT_AUTH_MECHANISMS=plain login
-      - PERMIT_DOCKER=network-interface
       - OUR_NETWORKS=10.42.0.0/16,10.43.0.0/16,10.0.0.0/24
+
     restart: always

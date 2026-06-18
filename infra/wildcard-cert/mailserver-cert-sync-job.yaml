@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mailserver-cert-sync
+  namespace: cert-manager
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+
+          containers:
+            - name: sync
+              image: bitnami/kubectl:latest
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+
+                  CERT_DIR=/host/mailserver/certs
+                  mkdir -p $CERT_DIR
+
+                  kubectl get secret wildcard-tls-mailserver -n cert-manager \
+                    -o jsonpath="{.data.tls\.crt}" | base64 -d > $CERT_DIR/fullchain.pem
+
+                  kubectl get secret wildcard-tls-mailserver -n cert-manager \
+                    -o jsonpath="{.data.tls\.key}" | base64 -d > $CERT_DIR/privkey.pem
+
+              volumeMounts:
+                - name: host
+                  mountPath: /host/mailserver
+
+          volumes:
+            - name: host
+              hostPath:
+                path: /opt/mailserver
