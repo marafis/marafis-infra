@@ -9,7 +9,7 @@ spec:
   source:
     repoURL: https://github.com/marafis/marafis-infra
     targetRevision: main
-    path: infra/wildcard-cert
+    path: infra/mail-server-cert
 
   destination:
     server: https://kubernetes.default.svc
