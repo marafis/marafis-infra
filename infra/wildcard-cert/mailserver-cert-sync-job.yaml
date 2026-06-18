@@ -10,7 +10,7 @@ spec:
       template:
         spec:
           restartPolicy: OnFailure
-          serviceAccountName: cert-manager
+          serviceAccountName: mailserver-cert-sync
           containers:
             - name: sync
               image: bitnami/kubectl:latest
@@ -24,10 +24,10 @@ spec:
                   mkdir -p $CERT_DIR
                   
                   kubectl get secret wildcard-tls -n ingress-nginx \
-                    -o jsonpath="{.data.tls\.crt}" | base64 -d > $CERT_DIR/fullchain.pem
+                    -o go-template='{{index .data "tls.crt" | base64decode}}' > $CERT_DIR/fullchain.pem
 
                   kubectl get secret wildcard-tls -n ingress-nginx \
-                    -o jsonpath="{.data.tls\.key}" | base64 -d > $CERT_DIR/privkey.pem
+                    -o go-template='{{index .data "tls.key" | base64decode}}' > $CERT_DIR/privkey.pem
 
               volumeMounts:
                 - name: host
