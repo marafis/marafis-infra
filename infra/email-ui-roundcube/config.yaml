@@ -1,27 +1,108 @@
-# infra/email-ui-roundcube/config.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: roundcube-config
   namespace: website
+  labels:
+    app.kubernetes.io/name: roundcube-config
+    app.kubernetes.io/part-of: marafis-email
 data:
   config.user.inc.php: |
     <?php
-    $config['default_host'] = 'ssl://94.130.107.251:993';
-    $config['smtp_server'] = 'tls://94.130.107.251:587';
     
-    // FDisable strict upstream verification for local network peering
+    // ==========================================
+    // Mail Server Configuration
+    // ==========================================
+    
+    // IMAP Configuration
+    // Connecting to mail.marafis.com:993 (IMAPS - implicit TLS)
+    $config['default_host'] = 'ssl://mail.marafis.com:993';
+    $config['default_port'] = 993;
+    
+    // SMTP Configuration  
+    // Connecting to mail.marafis.com:587 (SMTP with STARTTLS)
+    $config['smtp_server'] = 'tls://mail.marafis.com:587';
+    $config['smtp_port'] = 587;
+    
+    // ==========================================
+    // SSL/TLS Certificate Verification (ENABLED)
+    // ==========================================
+    // CRITICAL: Enable certificate verification for security
+    // This ensures we're connecting to the legitimate mail server
+    // and not susceptible to MITM attacks
+    
+    // IMAP SSL Configuration
     $config['imap_conn_options'] = [
         'ssl' => [
-            'verify_peer'       => false,
-            'verify_peer_name'  => false,
-            'allow_self_signed' => true
+            // Verify the server's SSL certificate is valid
+            'verify_peer'       => true,
+    
+            // Verify the hostname matches the certificate CN/SAN
+            'verify_peer_name'  => true,
+    
+            // Do NOT accept self-signed certificates
+            'allow_self_signed' => false,
+    
+            // Use system CA bundle for validation
+            'cafile'            => '/etc/ssl/certs/ca-certificates.crt',
+    
+            // Additional CA bundle (mounted from K8s secret)
+            // For custom/internal CAs if needed
+            'capath'            => '/usr/local/share/ca-certificates/',
         ],
     ];
+    
+    // SMTP SSL Configuration
     $config['smtp_conn_options'] = [
         'ssl' => [
-            'verify_peer'       => false,
-            'verify_peer_name'  => false,
-            'allow_self_signed' => true
+            'verify_peer'       => true,
+            'verify_peer_name'  => true,
+            'allow_self_signed' => false,
+            'cafile'            => '/etc/ssl/certs/ca-certificates.crt',
+            'capath'            => '/usr/local/share/ca-certificates/',
         ],
     ];
+    
+    // ==========================================
+    // Logging & Debugging
+    // ==========================================
+    // Enable SQL query logging for debugging (disable in production)
+    $config['debug_level'] = 4;
+    $config['sql_debug'] = false;
+    
+    // Log IMAP/SMTP connection issues to file
+    $config['log_file'] = 'roundcube.log';
+    
+    // ==========================================
+    // Security Settings
+    // ==========================================
+    $config['use_https'] = true;
+    $config['force_https'] = true;
+    
+    // Session configuration
+    $config['session_lifetime'] = 60;
+    $config['session_path'] = '/tmp';
+    
+    // ==========================================
+    // User Authentication & Domain
+    // ==========================================
+    // Automatically append domain to username if not provided
+    $config['username_domain'] = 'marafis.com';
+    
+    // Allow plain authentication (only use over encrypted connections)
+    $config['imap_auth_type'] = 'PLAIN LOGIN';
+    $config['smtp_auth_type'] = 'PLAIN LOGIN';
+    
+    // ==========================================
+    // Protocol/Feature Support
+    // ==========================================
+    // These are IMAP/SMTP protocol features supported by the mail server
+    $config['imap_delimiter'] = '/';
+    
+    // ==========================================
+    // UI & Features
+    // ==========================================
+    $config['allow_public_folders'] = false;
+    $config['drafts_mods'] = false;
+    
+    ?>

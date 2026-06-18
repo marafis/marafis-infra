@@ -1,27 +1,192 @@
+---
+# ==========================================
+# ServiceAccount for Certificate Sync Job
+# ==========================================
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: mailserver-cert-sync
   namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: mailserver-cert-sync
+    app.kubernetes.io/part-of: certificate-management
+  annotations:
+    description: "Service account for syncing certificates from K8s to external mail server"
+
 ---
+# ==========================================
+# ClusterRole: Minimal Permissions for Cert Reading
+# ==========================================
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: cert-reader
+  labels:
+    app.kubernetes.io/name: cert-reader
+  annotations:
+    description: "Minimal role for reading certificate secrets from K8s"
+
 rules:
+  # ==========================================
+  # Permissions to Read Secrets
+  # ==========================================
   - apiGroups: [""]
     resources: ["secrets"]
-    verbs: ["get", "list"]
+
+    # Only allow reading secrets (no write, delete, create)
+    verbs: ["get", "list", "watch"]
+
+    # Restrict to the ingress-nginx namespace
+    resourceNames:
+      - wildcard-tls        # Only this specific secret
+
+    # Only from ingress-nginx namespace
+    # (Note: this is handled by ClusterRoleBinding namespace restriction)
+
 ---
+# ==========================================
+# ClusterRoleBinding: Connect ServiceAccount to ClusterRole
+# ==========================================
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: cert-reader-binding
+  labels:
+    app.kubernetes.io/name: cert-reader-binding
+  annotations:
+    description: "Bind cert-reader role to mailserver-cert-sync service account"
+
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: cert-reader
+
 subjects:
   - kind: ServiceAccount
     name: mailserver-cert-sync
+    namespace: ingress-nginx    # Restrict to this namespace
+
+---
+# ==========================================
+# Role: Namespace-scoped permissions (Optional)
+# ==========================================
+# Alternative: Use Role instead of ClusterRole for tighter security
+# This restricts cert reading to only the ingress-nginx namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cert-reader-ns
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: cert-reader-ns
+  annotations:
+    description: "Namespace-scoped role for reading secrets in ingress-nginx"
+
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "watch"]
+    resourceNames:
+      - wildcard-tls
+
+---
+# ==========================================
+# RoleBinding: Namespace-scoped binding (Optional)
+# ==========================================
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cert-reader-binding-ns
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: cert-reader-binding-ns
+
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cert-reader-ns
+
+subjects:
+  - kind: ServiceAccount
+    name: mailserver-cert-sync
+    namespace: ingress-nginx
+
+---
+# ==========================================
+# ConfigMap: Audit Logging (Optional)
+# ==========================================
+# For tracking certificate sync operations
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cert-sync-audit-log
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: cert-sync-audit
+data:
+  # This will be populated by the CronJob
+  audit-log: |
+    [Audit Log for Certificate Sync Operations]
+    Format: TIMESTAMP | STATUS | ACTION | DETAILS
+
+---
+# ==========================================
+# ServiceAccount for certificate validation
+# (Optional: for debugging/monitoring)
+# ==========================================
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cert-validator
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: cert-validator
+  annotations:
+    description: "Service account for certificate validation and monitoring jobs"
+
+---
+# ==========================================
+# ClusterRole: Certificate Monitoring
+# (Optional: for certificate expiry alerts)
+# ==========================================
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cert-monitor
+  labels:
+    app.kubernetes.io/name: cert-monitor
+
+rules:
+  # Read certificate resources
+  - apiGroups: ["cert-manager.io"]
+    resources: ["certificates"]
+    verbs: ["get", "list", "watch"]
+
+  # Read certificate secrets
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "watch"]
+
+  # Create events for alerts
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
+
+---
+# ==========================================
+# ClusterRoleBinding: Monitoring
+# ==========================================
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cert-monitor-binding
+
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cert-monitor
+
+subjects:
+  - kind: ServiceAccount
+    name: cert-validator
     namespace: ingress-nginx

@@ -4,36 +4,168 @@ metadata:
   name: mailserver-cert-sync
   namespace: ingress-nginx
 spec:
-  schedule: "0 * * * *"
+  # Run every 6 hours to catch any cert updates promptly
+  schedule: "0 */6 * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+
   jobTemplate:
     spec:
+      backoffLimit: 3
       template:
         spec:
           restartPolicy: OnFailure
           serviceAccountName: mailserver-cert-sync
+
           containers:
-            - name: sync
+            - name: cert-sync
               image: bitnami/kubectl:latest
+              imagePullPolicy: IfNotPresent
+
+              env:
+                - name: CERT_DIR
+                  value: "/host/opt/mailserver/certs"
+                - name: SECRET_NAME
+                  value: "wildcard-tls"
+                - name: SECRET_NAMESPACE
+                  value: "ingress-nginx"
+                - name: MAIL_SERVER_IP
+                  value: "94.130.107.251"
+                - name: MAIL_SERVER_HOST
+                  value: "mail.marafis.com"
+
               command:
                 - /bin/sh
                 - -c
                 - |
                   set -e
-
-                  CERT_DIR=/host/opt/mailserver/certs
-                  mkdir -p $CERT_DIR
                   
-                  kubectl get secret wildcard-tls -n ingress-nginx \
-                    -o go-template='{{index .data "tls.crt" | base64decode}}' > $CERT_DIR/fullchain.pem
+                  echo "[$(date)] Starting certificate sync process..."
+                  
+                  CERT_DIR="${CERT_DIR}"
+                  SECRET_NAME="${SECRET_NAME}"
+                  SECRET_NAMESPACE="${SECRET_NAMESPACE}"
+                  
+                  # Ensure cert directory exists
+                  mkdir -p "$CERT_DIR"
+                  
+                  # Temporary files for atomic writes
+                  CERT_TMP="${CERT_DIR}/.fullchain.pem.tmp"
+                  KEY_TMP="${CERT_DIR}/.privkey.pem.tmp"
+                  CHAIN_TMP="${CERT_DIR}/.chain.pem.tmp"
+                  
+                  echo "[$(date)] Fetching certificate secret: $SECRET_NAME from namespace: $SECRET_NAMESPACE"
+                  
+                  # Extract leaf certificate (tls.crt)
+                  if ! kubectl get secret "$SECRET_NAME" -n "$SECRET_NAMESPACE" \
+                    -o go-template='{{index .data "tls.crt" | base64decode}}' > "$CERT_TMP" 2>/dev/null; then
+                    echo "[$(date)] ERROR: Failed to fetch tls.crt from secret"
+                    exit 1
+                  fi
+                  
+                  # Extract private key (tls.key)
+                  if ! kubectl get secret "$SECRET_NAME" -n "$SECRET_NAMESPACE" \
+                    -o go-template='{{index .data "tls.key" | base64decode}}' > "$KEY_TMP" 2>/dev/null; then
+                    echo "[$(date)] ERROR: Failed to fetch tls.key from secret"
+                    exit 1
+                  fi
+                  
+                  # Extract CA certificate chain (ca.crt) if it exists
+                  # cert-manager includes this in Kubernetes secrets
+                  if kubectl get secret "$SECRET_NAME" -n "$SECRET_NAMESPACE" \
+                    -o go-template='{{if index .data "ca.crt"}}{{index .data "ca.crt" | base64decode}}{{end}}' 2>/dev/null | grep -q "BEGIN"; then
+                    echo "[$(date)] CA certificate found in secret, including in chain"
+                    kubectl get secret "$SECRET_NAME" -n "$SECRET_NAMESPACE" \
+                      -o go-template='{{index .data "ca.crt" | base64decode}}' > "$CHAIN_TMP"
+                  else
+                    echo "[$(date)] No separate CA certificate in secret (using cert-manager default)"
+                    # Create empty CA chain - Let's Encrypt CAs are typically in system trust store
+                    touch "$CHAIN_TMP"
+                  fi
+                  
+                  # Verify certificate validity
+                  echo "[$(date)] Verifying certificate validity..."
+                  if ! openssl x509 -in "$CERT_TMP" -noout -check 2>/dev/null; then
+                    echo "[$(date)] ERROR: Certificate verification failed"
+                    rm -f "$CERT_TMP" "$KEY_TMP" "$CHAIN_TMP"
+                    exit 1
+                  fi
+                  
+                  # Check certificate expiry (warn if less than 14 days)
+                  EXPIRY_DATE=$(openssl x509 -in "$CERT_TMP" -noout -enddate | cut -d= -f2)
+                  EXPIRY_EPOCH=$(date -d "$EXPIRY_DATE" +%s)
+                  NOW_EPOCH=$(date +%s)
+                  DAYS_LEFT=$(( ($EXPIRY_EPOCH - $NOW_EPOCH) / 86400 ))
+                  
+                  if [ "$DAYS_LEFT" -lt 14 ]; then
+                    echo "[$(date)] WARNING: Certificate expires in $DAYS_LEFT days"
+                  else
+                    echo "[$(date)] Certificate valid for $DAYS_LEFT days"
+                  fi
+                  
+                  # Check certificate CN and SANs match expected domain
+                  CERT_CN=$(openssl x509 -in "$CERT_TMP" -noout -subject | grep -oP 'CN=\K[^,]*')
+                  echo "[$(date)] Certificate CN: $CERT_CN"
+                  
+                  # Build the complete certificate chain
+                  # Order: leaf cert + CA chain (required by mail servers)
+                  cat "$CERT_TMP" > "${CERT_DIR}/.fullchain.pem.new"
+                  if [ -s "$CHAIN_TMP" ]; then
+                    cat "$CHAIN_TMP" >> "${CERT_DIR}/.fullchain.pem.new"
+                  fi
+                  
+                  # Atomic replacement (prevents partial writes)
+                  mv "$CERT_TMP" "${CERT_DIR}/tls.crt"
+                  mv "$KEY_TMP" "${CERT_DIR}/tls.key"
+                  mv "${CERT_DIR}/.fullchain.pem.new" "${CERT_DIR}/fullchain.pem"
+                  
+                  # Set proper permissions (mail server needs read access)
+                  chmod 644 "${CERT_DIR}/fullchain.pem"
+                  chmod 644 "${CERT_DIR}/tls.crt"
+                  chmod 600 "${CERT_DIR}/tls.key"
+                  
+                  # Cleanup
+                  rm -f "$CHAIN_TMP" "${CERT_DIR}/.fullchain.pem.tmp" "${CERT_DIR}/.privkey.pem.tmp" "${CERT_DIR}/.chain.pem.tmp"
+                  
+                  # Verify files were created
+                  if [ ! -f "${CERT_DIR}/fullchain.pem" ] || [ ! -f "${CERT_DIR}/tls.key" ]; then
+                    echo "[$(date)] ERROR: Certificate files were not created properly"
+                    exit 1
+                  fi
+                  
+                  # Log successful sync with timestamps
+                  echo "[$(date)] ✓ Certificate sync completed successfully"
+                  echo "[$(date)] Files: fullchain.pem, tls.crt, tls.key"
+                  echo "[$(date)] fullchain.pem size: $(wc -c < ${CERT_DIR}/fullchain.pem) bytes"
+                  echo "[$(date)] Expiry: $EXPIRY_DATE (${DAYS_LEFT} days remaining)"
+                  
+                  exit 0
 
-                  kubectl get secret wildcard-tls -n ingress-nginx \
-                    -o go-template='{{index .data "tls.key" | base64decode}}' > $CERT_DIR/privkey.pem
+              # Health check: ensure we have openssl
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                runAsNonRoot: true
+                runAsUser: 65534
 
               volumeMounts:
                 - name: host
                   mountPath: /host
+                - name: tmp
+                  mountPath: /tmp
 
           volumes:
             - name: host
               hostPath:
                 path: /
+                type: Directory
+
+            # Writable tmp for temporary files
+            - name: tmp
+              emptyDir: {}
+
+          # Only run one instance at a time
+          parallelism: 1
+
+  # Resume automatic certificate check
+  suspend: false

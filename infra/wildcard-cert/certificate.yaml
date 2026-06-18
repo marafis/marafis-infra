@@ -2,21 +2,85 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: wildcard-tls
-  namespace: ingress-nginx             # Secret is created in ingress-nginx namespace
-spec:
-  secretName: wildcard-tls            # ingress-nginx references this via default-ssl-certificate
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: wildcard-certificate
+    app.kubernetes.io/instance: marafis
+    app.kubernetes.io/part-of: tls-infrastructure
+  annotations:
+    description: "Wildcard certificate for *.marafis.com - used by ingress-nginx and mail server"
 
+spec:
+  # ==========================================
+  # Secret Management
+  # ==========================================
+  # This secret contains the certificate and private key
+  # It's created in ingress-nginx namespace so ingress-nginx can read it directly
+  secretName: wildcard-tls
+
+  # ==========================================
+  # Certificate Issuer
+  # ==========================================
+  # Using Let's Encrypt for free wildcard certificates
+  # The ClusterIssuer "letsencrypt-wildcard" must be created separately
   issuerRef:
     name: letsencrypt-wildcard
     kind: ClusterIssuer
 
-  # Covers apex domain AND all subdomains.
-  # This single cert handles: marafis.com, www.marafis.com,
-  # app1.marafis.com, api.marafis.com — anything you add in future.
+  # ==========================================
+  # Certificate Details
+  # ==========================================
+  # Common Name (CN) in the certificate
+  # Note: Wildcard does NOT cover the apex domain
   commonName: "*.marafis.com"
-  dnsNames:
-    - "marafis.com"                   # Apex — wildcard does NOT cover this
-    - "*.marafis.com"                 # All subdomains: www, app1, api, etc.
 
-  # cert-manager will auto-renew 30 days before expiry
-  renewBefore: 720h                   # 30 days
+  # DNS Subject Alternative Names (SANs)
+  # These are all the domains covered by this certificate
+  dnsNames:
+    - "marafis.com"              # Apex domain (required separately)
+    - "*.marafis.com"            # All subdomains:
+      #   - www.marafis.com
+      #   - mail.marafis.com
+      #   - api.marafis.com
+      #   - webmail.marafis.com
+      #   - app.marafis.com
+    #   - ... any other subdomain
+
+  # ==========================================
+  # Certificate Validity & Renewal
+  # ==========================================
+  # How long before expiry should cert-manager request renewal
+  # Let's Encrypt certs are 90 days valid, so renewing 30 days before is safe
+  renewBefore: 720h              # 30 days (in hours)
+
+  # Duration of the certificate (Let's Encrypt uses 90 days)
+  duration: 2160h                # 90 days (in hours)
+
+  # ==========================================
+  # Key Configuration
+  # ==========================================
+  # Algorithm and size for the private key
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+
+  # ==========================================
+  # Encoding
+  # ==========================================
+  # How to encode the certificate secret
+  encoding:
+    privateKey: PKCS1
+
+---
+# ==========================================
+# DEPRECATED: Remove duplicate certificate
+# ==========================================
+# This replaces the old "wildcard-tls-mailserver" certificate
+# We now use a single certificate for all uses:
+# - Ingress (HTTPS for web services)
+# - Mail server (IMAPS, SMTPS, SMTP+STARTTLS)
+# - Any other services needing the wildcard cert
+#
+# To delete the old resource:
+# kubectl delete certificate wildcard-tls-mailserver -n ingress-nginx
