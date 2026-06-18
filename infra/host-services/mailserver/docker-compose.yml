@@ -19,28 +19,20 @@ services:
       - /opt/mailserver/mail-data:/var/mail
       - /opt/mailserver/mail-state:/var/mail-state
       - /opt/mailserver/mail-logs:/var/log/mail
-
-      # ONLY ONE CERT SOURCE (correct)
       - /opt/mailserver/certs:/tmp/dms/certs:ro
 
     environment:
       - OVERVIEW_ENABLED=0
-
-      # ✅ TLS (correct)
       - SSL_TYPE=manual
       - SSL_CERT_PATH=/tmp/dms/certs/fullchain.pem
       - SSL_KEY_PATH=/tmp/dms/certs/privkey.pem
-
-      # Performance
       - ENABLE_SPAMASSASSIN=0
       - ENABLE_CLAMAV=0
       - ENABLE_FAIL2BAN=1
       - ENABLE_POSTGREY=0
-
       - ONE_DIR=1
       - LOG_LEVEL=info
       - PERMIT_DOCKER=network
-      - PERMIT_DOCKER=network-interface
       - UPDATE_CHECK_INTERVAL=1d
       - DOVECOT_AUTH_MECHANISMS=plain login
       - OUR_NETWORKS=10.42.0.0/16,10.43.0.0/16,10.0.0.0/24

@@ -4,13 +4,13 @@ metadata:
   name: mailserver-cert-sync
   namespace: ingress-nginx
 spec:
-  schedule: "*/2 * * * *"
+  schedule: "0 * * * *"
   jobTemplate:
     spec:
       template:
         spec:
           restartPolicy: OnFailure
-
+          serviceAccountName: cert-manager
           containers:
             - name: sync
               image: bitnami/kubectl:latest
@@ -22,11 +22,11 @@ spec:
 
                   CERT_DIR=/host/opt/mailserver/certs
                   mkdir -p $CERT_DIR
-
-                  kubectl get secret wildcard-tls-mailserver -n ingress-nginx \
+                  
+                  kubectl get secret wildcard-tls -n ingress-nginx \
                     -o jsonpath="{.data.tls\.crt}" | base64 -d > $CERT_DIR/fullchain.pem
 
-                  kubectl get secret wildcard-tls-mailserver -n ingress-nginx \
+                  kubectl get secret wildcard-tls -n ingress-nginx \
                     -o jsonpath="{.data.tls\.key}" | base64 -d > $CERT_DIR/privkey.pem
 
               volumeMounts:
