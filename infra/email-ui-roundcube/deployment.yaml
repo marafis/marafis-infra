@@ -30,6 +30,10 @@ spec:
         checksum/config: "v1"
     
     spec:
+      hostAliases:
+        - ip: "10.0.0.2"
+          hostnames:
+            - "mail.marafis.com"
       # ==========================================
       # Init Container: Prepare CA Certificates
       # ==========================================
