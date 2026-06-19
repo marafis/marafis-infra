@@ -31,7 +31,7 @@ spec:
     
     spec:
       hostAliases:
-        - ip: "10.0.0.2"
+        - ip: "172.17.0.1"
           hostnames:
             - "mail.marafis.com"
       # ==========================================
