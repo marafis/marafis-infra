@@ -18,11 +18,17 @@ spec:
                 - /bin/sh
                 - -c
                 - |
-                  mkdir -p /host/opt/mailserver/certs
+                  set -e
 
-                  kubectl get secret wildcard-tls -n ingress-nginx -o go-template='{{range $k,$v := .data}}{{if eq $k "tls.crt"}}{{$v | base64decode}}{{end}}{{end}}' > /host/opt/mailserver/certs/fullchain.pem
+                  CERT_DIR=/host/opt/mailserver/certs
+                  mkdir -p $CERT_DIR
+                  
+                  # ✅ FIXED: Using bracket notation preserves the dot in the key name cleanly
+                  kubectl get secret wildcard-tls -n ingress-nginx \
+                    -o jsonpath="{.data['tls\.crt']}" | base64 -d > $CERT_DIR/fullchain.pem
 
-                  kubectl get secret wildcard-tls -n ingress-nginx -o go-template='{{range $k,$v := .data}}{{if eq $k "tls.key"}}{{$v | base64decode}}{{end}}{{end}}' > /host/opt/mailserver/certs/privkey.pem
+                  kubectl get secret wildcard-tls -n ingress-nginx \
+                    -o jsonpath="{.data['tls\.key']}" | base64 -d > $CERT_DIR/privkey.pem
               volumeMounts:
                 - name: host
                   mountPath: /host
