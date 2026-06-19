@@ -81,7 +81,8 @@ data:
     
     // Session configuration
     $config['session_lifetime'] = 60;
-    $config['session_path'] = '/tmp';
+    $config['session_path'] = '/';
+    $config['session_dir'] = '/tmp';
     
     // ==========================================
     // User Authentication & Domain
