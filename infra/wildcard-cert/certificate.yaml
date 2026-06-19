@@ -65,13 +65,6 @@ spec:
     encoding: PKCS1
     size: 2048
 
-  # ==========================================
-  # Encoding
-  # ==========================================
-  # How to encode the certificate secret
-  encoding:
-    privateKey: PKCS1
-
 ---
 # ==========================================
 # DEPRECATED: Remove duplicate certificate
