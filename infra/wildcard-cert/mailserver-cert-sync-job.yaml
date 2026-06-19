@@ -18,13 +18,10 @@ spec:
                 - /bin/sh
                 - -c
                 - |
-                  # Ensure destination exists
                   mkdir -p /host/opt/mailserver/certs
 
-                  # Extract public key cleanly using explicit quotation protection
                   kubectl get secret wildcard-tls -n ingress-nginx -o go-template='{{range $k,$v := .data}}{{if eq $k "tls.crt"}}{{$v | base64decode}}{{end}}{{end}}' > /host/opt/mailserver/certs/fullchain.pem
 
-                  # Extract private key cleanly
                   kubectl get secret wildcard-tls -n ingress-nginx -o go-template='{{range $k,$v := .data}}{{if eq $k "tls.key"}}{{$v | base64decode}}{{end}}{{end}}' > /host/opt/mailserver/certs/privkey.pem
               volumeMounts:
                 - name: host
