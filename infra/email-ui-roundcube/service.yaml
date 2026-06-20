@@ -18,4 +18,4 @@ metadata:
   namespace: website
 spec:
   type: ExternalName
-  externalName: 10.0.0.2 # ◄── Uses k3s default internal loopback DNS name
+  externalName: host.k3s.internal # ◄── Uses k3s default internal loopback DNS name
