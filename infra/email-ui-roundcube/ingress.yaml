@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: roundcube-ingress
+  namespace: website # ◄── Aligned to your ArgoCD Destination Namespace
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-wildcard" # ◄── Your confirmed working issuer
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+spec:
+  tls:
+    - hosts:
+        - webmail.marafis.com
+      secretName: webmail-marafis-tls
+  rules:
+    - host: webmail.marafis.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: roundcube-docker-bridge # ◄── Points to the service defined above
+                port:
+                  number: 8080               # Port where Roundcube is listening on the host
