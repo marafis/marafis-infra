@@ -4,18 +4,18 @@ metadata:
   name: roundcube-docker-bridge
   namespace: website # ◄── Aligned to your ArgoCD Destination Namespace
 spec:
+  clusterIP: None # ◄── Tells Kubernetes it's a Headless Service
+  type: ClusterIP
   ports:
     - protocol: TCP
       port: 8080       # Port used inside the cluster by the Ingress
       targetPort: 8080 # Port exposed on your host machine via Docker
 ---
 apiVersion: v1
-kind: Endpoints
+kind: Service
 metadata:
-  name: roundcube-docker-bridge
-  namespace: website # ◄── Must match the Service namespace exactly
-subsets:
-  - addresses:
-      - ip: 10.0.0.10 # ◄── REPLACE with your Master Node's physical Host LAN IP
-    ports:
-      - port: 8080     # Points to Docker Host Port 8080
+  name: roundcube-external-dns
+  namespace: website
+spec:
+  type: ExternalName
+  externalName: host.k3s.internal # ◄── Uses k3s default internal loopback DNS name
