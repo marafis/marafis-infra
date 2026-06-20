@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: roundcube-docker-bridge
+  namespace: default
+spec:
+  type: ExternalName
+  externalName: 10.42.0.0
