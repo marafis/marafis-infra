@@ -2,9 +2,9 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: roundcube-ingress
-  namespace: website # ◄── Aligned to your ArgoCD Destination Namespace
+  namespace: website
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-wildcard" # ◄── Your confirmed working issuer
+    cert-manager.io/cluster-issuer: "letsencrypt-wildcard"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
 spec:
   tls:
@@ -19,6 +19,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: roundcube-docker-bridge # ◄── Points to the service defined above
+                name: roundcube-docker-bridge
                 port:
-                  number: 8080               # Port where Roundcube is listening on the host
+                  number: 8080
