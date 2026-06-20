@@ -19,7 +19,7 @@ services:
       - /opt/mailserver/mail-data:/var/mail
       - /opt/mailserver/mail-state:/var/mail-state
       - /opt/mailserver/mail-logs:/var/log/mail
-      - /opt/mailserver/certs:/tmp/dms/certs:ro
+      - ./config/:/tmp/docker-mailserver/
 
     environment:
       - OVERVIEW_ENABLED=0
