@@ -1,0 +1,16 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: roundcube-ingress-route
+  namespace: website
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`webmail.marafis.com`)
+      kind: Rule
+      services:
+        - name: 10.0.0.10 # ◄── Direct target down to your host's IP address
+          port: 8080      # Roundcube physical exposure port
+  tls:
+    secretName: webmail-marafis-tls # Binds your validated Let's Encrypt secret keys
