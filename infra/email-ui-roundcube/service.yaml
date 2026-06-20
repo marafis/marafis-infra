@@ -16,6 +16,6 @@ metadata:
   namespace: website
 subsets:
   - addresses:
-      - ip: 10.0.0.10 # ◄── MUST be the IP of your master node where Docker is running
+      - ip: 10.0.0.2 # ◄── MUST be the IP of your master node where Docker is running
     ports:
       - port: 8080
