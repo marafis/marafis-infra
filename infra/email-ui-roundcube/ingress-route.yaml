@@ -10,7 +10,7 @@ spec:
     - match: Host(`webmail.marafis.com`)
       kind: Rule
       services:
-        - name: 10.0.0.10 # ◄── Direct target down to your host's IP address
+        - name: 10.0.0.2 # ◄── Direct target down to your host's IP address
           port: 8080      # Roundcube physical exposure port
   tls:
     secretName: webmail-marafis-tls # Binds your validated Let's Encrypt secret keys
