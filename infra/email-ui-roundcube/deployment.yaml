@@ -18,6 +18,6 @@ spec:
         - name: socat
           image: alpine/socat
           # This forwards internal port 8080 to your external IP
-          command: [ "socat", "TCP-LISTEN:8080,fork", "TCP:172.18.0.3:8080" ]
+          command: [ "socat", "TCP-LISTEN:8080,fork", "TCP:127.0.0.1:8080" ]
           ports:
             - containerPort: 8080
