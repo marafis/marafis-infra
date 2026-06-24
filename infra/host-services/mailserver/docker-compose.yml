@@ -5,19 +5,31 @@ services:
     hostname: mail
     domainname: marafis.com
     ports:
-      - "25:25"       # SMTP
-      - "143:143"     # IMAP Non-SSL
-      - "587:587"     # SMTP Submission
+      - "25:25"      # SMTP
+      - "465:465"    # SMTPS
+      - "587:587"    # SMTP Submission (STARTTLS)
+      - "143:143"    # IMAP (optional)
+      - "993:993"    # IMAPS
     volumes:
       - /opt/mail-stack/mail-data:/var/mail
       - /opt/mail-stack/mail-state:/var/mail-state
       - /opt/mail-stack/mail-logs:/var/log/mail
       - /opt/mail-stack/config:/tmp/docker-mailserver
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+
     environment:
-      - TLS_LEVEL=none
+      - TLS_LEVEL=modern
+      - SSL_TYPE=letsencrypt
       - ONE_DIR=1
       - ENABLE_FAIL2BAN=1
       - PERMIT_DOCKER=network
+      # 🔐 CRITICAL SECURITY SETTINGS
+      - ENABLE_IMAP=1
+      - ENABLE_IMAPS=1
+      - ENABLE_POP3=0
+      - ENABLE_SPAMASSASSIN=0
+      - ENABLE_CLAMAV=0
+      - POSTFIX_INET_PROTOCOLS=ipv4
     networks:
       - mail-net
     restart: always
@@ -30,6 +42,7 @@ services:
     environment:
       - ROUNDCUBEMAIL_URL=https://webmail.marafis.com
       - ROUNDCUBEMAIL_DEFAULT_HOST=mailserver
+      - ROUNDCUBEMAIL_DEFAULT_PORT=993
       - ROUNDCUBEMAIL_SMTP_SERVER=mailserver
       - ROUNDCUBEMAIL_SMTP_PORT=587
       - ROUNDCUBEMAIL_SMTP_USER=%u
@@ -42,4 +55,5 @@ services:
 
 networks:
   mail-net:
+    name: mail-stack_mail-net
     driver: bridge

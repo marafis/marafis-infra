@@ -4,5 +4,7 @@ metadata:
   name: roundcube-docker-bridge
   namespace: website
 spec:
-  type: ExternalName
-  externalName: host.k3s.internal
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
