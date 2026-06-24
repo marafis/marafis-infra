@@ -21,4 +21,4 @@ spec:
               service:
                 name: roundcube-docker-bridge
                 port:
-                  number: 8080
+                  number: 8001
