@@ -15,5 +15,7 @@ spec:
         app: roundcube-bridge-placeholder
     spec:
       containers:
-        - name: pause
-          image: registry.k8s.io/pause:3.9
+        - name: socat
+          image: alpine/socat
+          # This forwards internal port 8080 to your external IP
+          command: [ "socat", "TCP-LISTEN:8080,fork", "TCP:172.18.0.3:8080" ]
