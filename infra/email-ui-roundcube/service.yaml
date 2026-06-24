@@ -4,6 +4,8 @@ metadata:
   name: roundcube-docker-bridge
   namespace: website
 spec:
+  selector:
+    app: roundcube-bridge-placeholder
   ports:
     - protocol: TCP
       port: 8080

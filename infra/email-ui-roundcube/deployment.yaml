@@ -1,0 +1,19 @@
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: roundcube-bridge-placeholder
+  namespace: website
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: roundcube-bridge-placeholder
+  template:
+    metadata:
+      labels:
+        app: roundcube-bridge-placeholder
+    spec:
+      containers:
+        - name: pause
+          image: registry.k8s.io/pause:3.9
