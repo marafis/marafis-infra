@@ -1,40 +1,45 @@
-version: '3.8'
-
 services:
   mailserver:
     image: ghcr.io/docker-mailserver/docker-mailserver:latest
     container_name: mailserver
-
     hostname: mail
     domainname: marafis.com
-
     ports:
-      - "25:25"
-      - "143:143"
-      - "465:465"
-      - "587:587"
-      - "993:993"
-
+      - "25:25"       # SMTP
+      - "143:143"     # IMAP Non-SSL
+      - "587:587"     # SMTP Submission
     volumes:
-      - /opt/mailserver/mail-data:/var/mail
-      - /opt/mailserver/mail-state:/var/mail-state
-      - /opt/mailserver/mail-logs:/var/log/mail
-      - ./config/:/tmp/docker-mailserver/
-
+      - /opt/mail-stack/mail-data:/var/mail
+      - /opt/mail-stack/mail-state:/var/mail-state
+      - /opt/mail-stack/mail-logs:/var/log/mail
+      - /opt/mail-stack/config:/tmp/docker-mailserver
     environment:
-      - OVERVIEW_ENABLED=0
-      - SSL_TYPE=manual
-      - SSL_CERT_PATH=/tmp/dms/certs/fullchain.pem
-      - SSL_KEY_PATH=/tmp/dms/certs/privkey.pem
-      - ENABLE_SPAMASSASSIN=0
-      - ENABLE_CLAMAV=0
-      - ENABLE_FAIL2BAN=1
-      - ENABLE_POSTGREY=0
+      - TLS_LEVEL=none
       - ONE_DIR=1
-      - LOG_LEVEL=info
+      - ENABLE_FAIL2BAN=1
       - PERMIT_DOCKER=network
-      - UPDATE_CHECK_INTERVAL=1d
-      - DOVECOT_AUTH_MECHANISMS=plain login
-      - OUR_NETWORKS=10.42.0.0/16,10.43.0.0/16,10.0.0.0/24
-
+    networks:
+      - mail-net
     restart: always
+
+  roundcube:
+    image: roundcube/roundcubemail:latest
+    container_name: roundcube
+    ports:
+      - "8080:80"
+    environment:
+      - ROUNDCUBEMAIL_URL=https://webmail.marafis.com
+      - ROUNDCUBEMAIL_DEFAULT_HOST=mailserver
+      - ROUNDCUBEMAIL_SMTP_SERVER=mailserver
+      - ROUNDCUBEMAIL_SMTP_PORT=587
+      - ROUNDCUBEMAIL_SMTP_USER=%u
+      - ROUNDCUBEMAIL_SMTP_PASSWORD=%p
+    depends_on:
+      - mailserver
+    networks:
+      - mail-net
+    restart: always
+
+networks:
+  mail-net:
+    driver: bridge
