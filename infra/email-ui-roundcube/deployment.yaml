@@ -20,4 +20,4 @@ spec:
           # This forwards internal port 8080 to your external IP
           command: [ "socat", "TCP-LISTEN:8001,fork", "TCP:127.0.0.1:8001" ]
           ports:
-            - containerPort: 8080
+            - containerPort: 8001
