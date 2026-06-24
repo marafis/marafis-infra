@@ -14,7 +14,6 @@ spec:
       labels:
         app: roundcube-bridge-placeholder
     spec:
-      hostNetwork: true
       containers:
         - name: socat
           image: alpine/socat
