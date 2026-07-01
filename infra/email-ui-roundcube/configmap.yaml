@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: roundcube-config
+  namespace: website
+data:
+  config.inc.php: |
+    <?php
+    $config = [];
+
+    // Database - sqlite, stored on a persistent volume
+    $config['db_dsnw'] = 'sqlite:////var/roundcube/db/sqlite.db?mode=0646';
+
+    // IMAP
+    $config['imap_host'] = 'ssl://mail.marafis.com:993';
+    $config['imap_conn_options'] = [
+        'ssl' => [
+            'verify_peer'      => true,
+            'verify_peer_name' => true,
+            'peer_name'        => 'mail.marafis.com',
+        ],
+    ];
+    $config['imap_timeout'] = 15;
+
+    // SMTP
+    $config['smtp_host'] = 'tls://mail.marafis.com:587';
+    $config['smtp_user'] = '%u';
+    $config['smtp_pass'] = '%p';
+    $config['smtp_conn_options'] = [
+        'ssl' => [
+            'verify_peer'      => true,
+            'verify_peer_name' => true,
+            'peer_name'        => 'mail.marafis.com',
+        ],
+    ];
+
+    // Misc
+    $config['product_name'] = 'Marafis Webmail';
+    $config['des_key']      = 'a1b2c3d4e5f6g7h8i9j0k1l2';  // replace with your own 24-char random string
+    $config['plugins']      = ['archive', 'zipdownload'];
+    $config['skin']         = 'elastic';
+
+    // Logging - leave this ON until the connection issue is confirmed fixed
+    $config['log_driver']  = 'stdout';
+    $config['debug_level'] = 1;
+    $config['imap_debug']  = true;
+    $config['smtp_debug']  = true;

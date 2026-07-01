@@ -15,9 +15,39 @@ spec:
         app: roundcube-bridge-placeholder
     spec:
       containers:
-        - name: socat
-          image: alpine/socat
-          # This forwards internal port 8080 to your external IP
-          command: [ "socat", "TCP-LISTEN:8001,fork", "TCP:94.130.107.251:8001" ]
+        - name: roundcube
+          image: roundcube/roundcubemail:latest
           ports:
-            - containerPort: 8001
+            - containerPort: 80
+          env:
+            - name: ROUNDCUBEMAIL_SKIN
+              value: elastic
+            # These env vars are backup/defaults; config.inc.php below takes precedence
+            - name: ROUNDCUBEMAIL_DEFAULT_HOST
+              value: "ssl://mail.marafis.com"
+            - name: ROUNDCUBEMAIL_DEFAULT_PORT
+              value: "993"
+            - name: ROUNDCUBEMAIL_SMTP_SERVER
+              value: "tls://mail.marafis.com"
+            - name: ROUNDCUBEMAIL_SMTP_PORT
+              value: "587"
+          volumeMounts:
+            - name: rc-config
+              mountPath: /var/www/html/config/config.inc.php
+              subPath: config.inc.php
+            - name: rc-db
+              mountPath: /var/roundcube/db
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: rc-config
+          configMap:
+            name: roundcube-config
+        - name: rc-db
+          persistentVolumeClaim:
+            claimName: roundcube-db

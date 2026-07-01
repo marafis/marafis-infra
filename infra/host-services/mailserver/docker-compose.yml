@@ -34,25 +34,6 @@ services:
       - mail-net
     restart: always
 
-  roundcube:
-    image: roundcube/roundcubemail:latest
-    container_name: roundcube
-    ports:
-      - "8080:80"
-    environment:
-      - ROUNDCUBEMAIL_URL=https://webmail.marafis.com
-      - ROUNDCUBEMAIL_DEFAULT_HOST=mailserver
-      - ROUNDCUBEMAIL_DEFAULT_PORT=993
-      - ROUNDCUBEMAIL_SMTP_SERVER=mailserver
-      - ROUNDCUBEMAIL_SMTP_PORT=587
-      - ROUNDCUBEMAIL_SMTP_USER=%u
-      - ROUNDCUBEMAIL_SMTP_PASSWORD=%p
-    depends_on:
-      - mailserver
-    networks:
-      - mail-net
-    restart: always
-
 networks:
   mail-net:
     name: mail-stack_mail-net
