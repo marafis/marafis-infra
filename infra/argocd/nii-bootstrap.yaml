@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nii
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "100"  # Deploy after core infrastructure
+    description: "Network Incident Intelligence Platform - Bootstrap App of Apps"
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/marafis/network-incident-intelligence
+    targetRevision: main
+    path: gitops/apps
+    # ArgoCD will discover all Application CRs in gitops/apps/ and treat them as child apps
+    directory:
+      recurse: true
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+
+  syncPolicy:
+    automated:
+      prune: false         # Don't prune orphaned resources
+      selfHeal: true       # Auto-sync on detected drift
+    syncOptions:
+      - CreateNamespace=true  # Create 'nii' namespace if it doesn't exist
+      - Validate=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+  # Ignore operator-managed fields to prevent perpetual OutOfSync
+  ignoreDifferences:
+    - group: apps
+      kind: StatefulSet
+      jsonPointers:
+        - /spec/persistentVolumeClaimRetentionPolicy
+    - group: strimzi.io
+      kind: Kafka
+      jsonPointers:
+        - /status
+    - group: strimzi.io
+      kind: KafkaTopic
+      jsonPointers:
+        - /status
