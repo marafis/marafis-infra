@@ -42,6 +42,6 @@ data:
 
     // Logging - leave this ON until the connection issue is confirmed fixed
     $config['log_driver']  = 'stdout';
-    $config['debug_level'] = 1;
-    $config['imap_debug']  = true;
-    $config['smtp_debug']  = true;
+    $config['debug_level'] = 0;
+    $config['imap_debug']  = false;
+    $config['smtp_debug']  = false;
